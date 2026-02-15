@@ -2,17 +2,29 @@
    Contains the game-state FSM 
    
    Input Switch Map:
-   0 - MSB of User Input
-   1 - User Input
-   2 - LSB of User Input
-   3
-   4
-   5
+   0 - MSB of User Input   | MSB of Seed & Delay Input
+   1 - User Input          | Seed & Delay Input
+   2 - LSB of User Input   | Seed & Delay Input
+   3                       | Seed & Delay Input
+   4                       | Seed Input & LSB of Delay Input
+   5                       | LSB of Seed Input
    6 - Submit Answer
    7 - Start / End Game
+
+   Game Loop:
+   1) All switches must be low to start, flip 7 high
+   2) Enter seed value on switches[0:5], flip 6 high then low
+   3) Game starts
+   4) Flash a number on the seven seg; Wait for user input
+
+   FSM Rules:
+   1) If switch[7] ever goes low, go to reset state
+   2) Switch[6] must be flipped high then low to detect input
+    - Requires an intermediary state to catch correctly
+   3) 
    */
 
-module top (
+module tt_um_memory_game_top (
     input logic clk,
     input logic rst_n,
 
@@ -20,6 +32,8 @@ module top (
     output logic [7:0] uo_out   // Seven Seg Output
 
 );
+
+
 
 typedef enum logic [2:0] { // FSM States
     RST,
