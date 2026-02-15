@@ -12,10 +12,10 @@ module reg_file_testbench;
     // ═══════════════════════════════════════════════════════════
     logic       clk;
     logic       we;
-    logic [3:0] in_reg;
-    logic [3:0] in_sel;
-    logic [3:0] out_reg;
-    logic [3:0] out_sel;
+    logic [2:0] in_reg;
+    logic [2:0] in_sel;
+    logic [2:0] out_reg;
+    logic [2:0] out_sel;
 
     // ═══════════════════════════════════════════════════════════
     // Testbench Variables
@@ -49,8 +49,8 @@ module reg_file_testbench;
     // Check expected vs actual value
     task check_value(
         input string signal_name,
-        input logic [3:0] expected,
-        input logic [3:0] actual
+        input logic [2:0] expected,
+        input logic [2:0] actual
     );
         begin
             test_count++;
@@ -65,7 +65,7 @@ module reg_file_testbench;
     endtask
 
     // Write a value to a register and wait one clock cycle
-    task write_reg(input logic [3:0] sel, input logic [3:0] data);
+    task write_reg(input logic [2:0] sel, input logic [2:0] data);
         begin
             @(posedge clk);
             in_sel = sel;
@@ -77,7 +77,7 @@ module reg_file_testbench;
     endtask
 
     // Read a register (combinational, just set out_sel and sample)
-    task read_reg(input logic [3:0] sel, output logic [3:0] data);
+    task read_reg(input logic [2:0] sel, output logic [2:0] data);
         begin
             out_sel = sel;
             #1;
@@ -104,9 +104,9 @@ module reg_file_testbench;
         fail_count = 0;
 
         // Initialize signals
-        in_reg  = 4'd0;
-        in_sel  = 4'd0;
-        out_sel = 4'd0;
+        in_reg  = 3'd0;
+        in_sel  = 3'd0;
+        out_sel = 3'd0;
         we      = 1'b0;
 
         $display("\n============================================");
@@ -117,27 +117,27 @@ module reg_file_testbench;
         // TEST 1: Single Write and Read
         // ───────────────────────────────────────────────────────
         $display("[TEST 1] Single Write and Read");
-        write_reg(4'd0, 4'hA);
+        write_reg(3'd0, 3'h5);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd0, rdata);
-            check_value("reg[0] after write 0xA", 4'hA, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd0, rdata);
+            check_value("reg[0] after write 0x5", 3'h5, rdata);
         end
         $display("");
 
         // ───────────────────────────────────────────────────────
-        // TEST 2: Write and Read All 16 Registers
+        // TEST 2: Write and Read All 8 Registers
         // ───────────────────────────────────────────────────────
-        $display("[TEST 2] Write and Read All 16 Registers");
+        $display("[TEST 2] Write and Read All 8 Registers");
         // Write a unique value to each register
-        for (int i = 0; i < 16; i++) begin
-            write_reg(i[3:0], i[3:0] + 4'd1);
+        for (int i = 0; i < 8; i++) begin
+            write_reg(i[2:0], (i[2:0] + 3'd1) & 3'h7);
         end
         // Read back and verify each register
-        for (int i = 0; i < 16; i++) begin
-            logic [3:0] rdata;
-            read_reg(i[3:0], rdata);
-            check_value($sformatf("reg[%0d]", i), i[3:0] + 4'd1, rdata);
+        for (int i = 0; i < 8; i++) begin
+            logic [2:0] rdata;
+            read_reg(i[2:0], rdata);
+            check_value($sformatf("reg[%0d]", i), (i[2:0] + 3'd1) & 3'h7, rdata);
         end
         $display("");
 
@@ -145,18 +145,18 @@ module reg_file_testbench;
         // TEST 3: Overwrite a Register
         // ───────────────────────────────────────────────────────
         $display("[TEST 3] Overwrite a Register");
-        write_reg(4'd5, 4'hF);
+        write_reg(3'd5, 3'h6);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd5, rdata);
-            check_value("reg[5] first write 0xF", 4'hF, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd5, rdata);
+            check_value("reg[5] first write 0x6", 3'h6, rdata);
         end
         // Overwrite with a new value
-        write_reg(4'd5, 4'h7);
+        write_reg(3'd5, 3'h3);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd5, rdata);
-            check_value("reg[5] overwrite 0x7", 4'h7, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd5, rdata);
+            check_value("reg[5] overwrite 0x3", 3'h3, rdata);
         end
         $display("");
 
@@ -165,16 +165,16 @@ module reg_file_testbench;
         // ───────────────────────────────────────────────────────
         $display("[TEST 4] Write Does Not Affect Other Registers");
         // Write known values to reg[0] and reg[1]
-        write_reg(4'd0, 4'hA);
-        write_reg(4'd1, 4'h5);
+        write_reg(3'd0, 3'h5);
+        write_reg(3'd1, 3'h2);
         // Overwrite reg[0], verify reg[1] is unchanged
-        write_reg(4'd0, 4'hF);
+        write_reg(3'd0, 3'h7);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd1, rdata);
-            check_value("reg[1] unchanged after reg[0] write", 4'h5, rdata);
-            read_reg(4'd0, rdata);
-            check_value("reg[0] updated to 0xF", 4'hF, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd1, rdata);
+            check_value("reg[1] unchanged after reg[0] write", 3'h2, rdata);
+            read_reg(3'd0, rdata);
+            check_value("reg[0] updated to 0x7", 3'h7, rdata);
         end
         $display("");
 
@@ -183,18 +183,18 @@ module reg_file_testbench;
         // ───────────────────────────────────────────────────────
         $display("[TEST 5] Boundary Values (min/max data)");
         // Write 0x0 (all zeros)
-        write_reg(4'd3, 4'h0);
+        write_reg(3'd3, 3'h0);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd3, rdata);
-            check_value("reg[3] = 0x0", 4'h0, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd3, rdata);
+            check_value("reg[3] = 0x0", 3'h0, rdata);
         end
-        // Write 0xF (all ones)
-        write_reg(4'd3, 4'hF);
+        // Write 0x7 (all ones)
+        write_reg(3'd3, 3'h7);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd3, rdata);
-            check_value("reg[3] = 0xF", 4'hF, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd3, rdata);
+            check_value("reg[3] = 0x7", 3'h7, rdata);
         end
         $display("");
 
@@ -202,14 +202,14 @@ module reg_file_testbench;
         // TEST 6: Boundary Register Addresses (first and last)
         // ───────────────────────────────────────────────────────
         $display("[TEST 6] Boundary Register Addresses");
-        write_reg(4'd0, 4'hC);
-        write_reg(4'd15, 4'hD);
+        write_reg(3'd0, 3'h4);
+        write_reg(3'd7, 3'h6);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd0, rdata);
-            check_value("reg[0] (first)", 4'hC, rdata);
-            read_reg(4'd15, rdata);
-            check_value("reg[15] (last)", 4'hD, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd0, rdata);
+            check_value("reg[0] (first)", 3'h4, rdata);
+            read_reg(3'd7, rdata);
+            check_value("reg[7] (last)", 3'h6, rdata);
         end
         $display("");
 
@@ -217,17 +217,17 @@ module reg_file_testbench;
         // TEST 7: Write Enable Deasserted (no write)
         // ───────────────────────────────────────────────────────
         $display("[TEST 7] Write Enable Deasserted");
-        write_reg(4'd2, 4'hB);
+        write_reg(3'd2, 3'h5);
         // Attempt write with we=0
         @(posedge clk);
-        in_sel = 4'd2;
-        in_reg = 4'h3;
+        in_sel = 3'd2;
+        in_reg = 3'h3;
         we = 1'b0;
         @(posedge clk);
         begin
-            logic [3:0] rdata;
-            read_reg(4'd2, rdata);
-            check_value("reg[2] unchanged (we=0)", 4'hB, rdata);
+            logic [2:0] rdata;
+            read_reg(3'd2, rdata);
+            check_value("reg[2] unchanged (we=0)", 3'h5, rdata);
         end
         $display("");
 
