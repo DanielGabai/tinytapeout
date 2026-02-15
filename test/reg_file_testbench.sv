@@ -2,14 +2,10 @@
 
 module reg_file_testbench;
 
-    // ═══════════════════════════════════════════════════════════
     // Parameters
-    // ═══════════════════════════════════════════════════════════
     localparam CLK_PERIOD = 10;  // 100MHz clock (10ns period)
 
-    // ═══════════════════════════════════════════════════════════
     // DUT Signals
-    // ═══════════════════════════════════════════════════════════
     logic       clk;
     logic       we;
     logic [2:0] in_reg;
@@ -17,16 +13,12 @@ module reg_file_testbench;
     logic [2:0] out_reg;
     logic [2:0] out_sel;
 
-    // ═══════════════════════════════════════════════════════════
     // Testbench Variables
-    // ═══════════════════════════════════════════════════════════
     integer test_count;
     integer pass_count;
     integer fail_count;
 
-    // ═══════════════════════════════════════════════════════════
     // Device Under Test (DUT)
-    // ═══════════════════════════════════════════════════════════
     reg_file uut (
         .clk     (clk),
         .we      (we),
@@ -36,15 +28,11 @@ module reg_file_testbench;
         .out_sel (out_sel)
     );
 
-    // ═══════════════════════════════════════════════════════════
     // Clock Generation
-    // ═══════════════════════════════════════════════════════════
     initial clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
-    // ═══════════════════════════════════════════════════════════
-    // Helper Tasks
-    // ═══════════════════════════════════════════════════════════
+    // --- Helper Tasks ---
 
     // Check expected vs actual value
     task check_value(
@@ -90,9 +78,7 @@ module reg_file_testbench;
         repeat (n) @(posedge clk);
     endtask
 
-    // ═══════════════════════════════════════════════════════════
-    // Main Test Sequence
-    // ═══════════════════════════════════════════════════════════
+    // --- Main Test Sequence ---
     initial begin
         // Setup waveform dumping
         $dumpfile("logs/reg_file_testbench.vcd");
@@ -113,9 +99,9 @@ module reg_file_testbench;
         $display("  reg_file Testbench");
         $display("============================================\n");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 1: Single Write and Read
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 1] Single Write and Read");
         write_reg(3'd0, 3'h5);
         begin
@@ -125,9 +111,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 2: Write and Read All 8 Registers
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 2] Write and Read All 8 Registers");
         // Write a unique value to each register
         for (int i = 0; i < 8; i++) begin
@@ -141,9 +127,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 3: Overwrite a Register
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 3] Overwrite a Register");
         write_reg(3'd5, 3'h6);
         begin
@@ -160,9 +146,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 4: Write Does Not Affect Other Registers
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 4] Write Does Not Affect Other Registers");
         // Write known values to reg[0] and reg[1]
         write_reg(3'd0, 3'h5);
@@ -178,9 +164,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 5: Boundary Values
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 5] Boundary Values (min/max data)");
         // Write 0x0 (all zeros)
         write_reg(3'd3, 3'h0);
@@ -198,9 +184,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 6: Boundary Register Addresses (first and last)
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 6] Boundary Register Addresses");
         write_reg(3'd0, 3'h4);
         write_reg(3'd7, 3'h6);
@@ -213,9 +199,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 7: Write Enable Deasserted (no write)
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 7] Write Enable Deasserted");
         write_reg(3'd2, 3'h5);
         // Attempt write with we=0
@@ -231,9 +217,9 @@ module reg_file_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // Final Summary
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("\n============================================");
         $display("  Test Summary");
         $display("--------------------------------------------");
@@ -253,9 +239,7 @@ module reg_file_testbench;
         $finish;
     end
 
-    // ═══════════════════════════════════════════════════════════
     // Timeout Watchdog
-    // ═══════════════════════════════════════════════════════════
     initial begin
         #1000000;  // 1ms timeout
         $display("\n ERROR: Simulation timeout!");
