@@ -38,7 +38,8 @@ module tt_um_memory_game_top (
 typedef enum logic [2:0] { // FSM States
     RST,
     LOAD_SEED,
-    LOAD_REG_FILE
+    LOAD_REG_FILE,
+    LOAD_DELAY
 } state_t;
 
 state_t state, next_state;
@@ -54,7 +55,9 @@ end
 always_comb begin
     next_state = state;
     case (state) 
-        RST : next_state = LOAD_SEED;
+        RST : begin
+            next_state = LOAD_SEED;
+        end
         LOAD_SEED : next_state = LOAD_REG_FILE;
         LOAD_REG_FILE : next_state = LOAD_REG_FILE;
     endcase
