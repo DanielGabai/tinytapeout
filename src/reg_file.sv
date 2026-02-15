@@ -1,17 +1,17 @@
-/* 16 4-bit registers that can store random game sequence */
+/* 16 3-bit registers that can store random game sequence */
 
 module reg_file (
     input logic clk,
     input logic we,
     
-    input logic [3:0] in_reg,
-    input logic [3:0] in_sel,
-    input logic [3:0] out_sel,
+    input logic [2:0] in_reg,
+    input logic [2:0] in_sel,
+    input logic [2:0] out_sel,
 
-    output logic [3:0] out_reg
+    output logic [2:0] out_reg
 );
 
-logic [3:0] registers [15:0];
+logic [2:0] registers [15:0];
 
 always_ff @(posedge clk) begin
     if (we) begin
