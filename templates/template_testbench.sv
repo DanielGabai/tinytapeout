@@ -1,15 +1,11 @@
 `timescale 1ns / 1ps
-
+// Do not use special symbols in testing
 module MODULE_NAME_testbench;
 
-    // ═══════════════════════════════════════════════════════════
     // Parameters
-    // ═══════════════════════════════════════════════════════════
     localparam CLK_PERIOD = 10;  // 100MHz clock (10ns period)
 
-    // ═══════════════════════════════════════════════════════════
     // DUT Signals
-    // ═══════════════════════════════════════════════════════════
     logic       clk;
     logic       rst_n;
     // Add your module's inputs/outputs here:
@@ -18,33 +14,26 @@ module MODULE_NAME_testbench;
     // logic [7:0] data_out;
     // logic       valid;
 
-    // ═══════════════════════════════════════════════════════════
     // Testbench Variables
-    // ═══════════════════════════════════════════════════════════
     integer test_count;
     integer pass_count;
     integer fail_count;
 
-    // ═══════════════════════════════════════════════════════════
     // Device Under Test (DUT)
-    // ═══════════════════════════════════════════════════════════
     MODULE_NAME uut (
         .clk   (clk),
         .rst_n (rst_n)
         // Connect your module's ports here
     );
 
-    // ═══════════════════════════════════════════════════════════
     // Clock Generation
-    // ═══════════════════════════════════════════════════════════
     initial clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
-    // ═══════════════════════════════════════════════════════════
-    // Helper Tasks
-    // ═══════════════════════════════════════════════════════════
-    
+    // --- Helper Tasks ---
+
     // Reset the DUT (synchronous reset)
+    // Reset the DUT before each test
     task reset_dut();
         begin
             @(posedge clk);
@@ -66,10 +55,10 @@ module MODULE_NAME_testbench;
             test_count++;
             if (actual === expected) begin
                 pass_count++;
-                $display("  ✓ PASS: %s = %0d (expected %0d)", signal_name, actual, expected);
+                $display("  PASS: %s = %0d (expected %0d)", signal_name, actual, expected);
             end else begin
                 fail_count++;
-                $display("  ✗ FAIL: %s = %0d (expected %0d)", signal_name, actual, expected);
+                $display("  FAIL: %s = %0d (expected %0d)", signal_name, actual, expected);
             end
         end
     endtask
@@ -79,9 +68,7 @@ module MODULE_NAME_testbench;
         repeat (n) @(posedge clk);
     endtask
 
-    // ═══════════════════════════════════════════════════════════
-    // Main Test Sequence
-    // ═══════════════════════════════════════════════════════════
+    // --- Main Test Sequence ---
     initial begin
         // Setup waveform dumping
         $dumpfile("logs/MODULE_NAME_testbench.vcd");
@@ -96,60 +83,56 @@ module MODULE_NAME_testbench;
         rst_n = 1;
         // Set your initial signal values here
 
-        $display("\n╔════════════════════════════════════════════════════╗");
-        $display("║  MODULE_NAME Testbench                            ║");
-        $display("╚════════════════════════════════════════════════════╝\n");
+        $display("");
+        $display("========================================");
+        $display("  MODULE_NAME Testbench");
+        $display("========================================");
+        $display("");
 
-        // ───────────────────────────────────────────────────────
         // TEST 1: Reset Verification
-        // ───────────────────────────────────────────────────────
         $display("[TEST 1] Reset Verification");
         reset_dut();
         // Check reset state of your outputs here
         $display("");
 
-        // ───────────────────────────────────────────────────────
         // TEST 2: Basic Functionality
-        // ───────────────────────────────────────────────────────
         $display("[TEST 2] Basic Functionality");
+        reset_dut();
         // Add your test logic here
         $display("");
 
-        // ───────────────────────────────────────────────────────
         // TEST 3: Edge Cases
-        // ───────────────────────────────────────────────────────
         $display("[TEST 3] Edge Cases");
+        reset_dut();
         // Test boundary conditions
         $display("");
 
-        // ───────────────────────────────────────────────────────
-        // Final Summary
-        // ───────────────────────────────────────────────────────
-        $display("\n╔════════════════════════════════════════════════════╗");
-        $display("║  Test Summary                                      ║");
-        $display("╠════════════════════════════════════════════════════╣");
-        $display("║  Total Tests: %3d                                  ║", test_count);
-        $display("║  Passed:      %3d                                  ║", pass_count);
-        $display("║  Failed:      %3d                                  ║", fail_count);
-        $display("╠════════════════════════════════════════════════════╣");
-        
+        // --- Final Summary ---
+        $display("");
+        $display("========================================");
+        $display("  Test Summary");
+        $display("----------------------------------------");
+        $display("  Total Tests: %3d", test_count);
+        $display("  Passed:      %3d", pass_count);
+        $display("  Failed:      %3d", fail_count);
+        $display("----------------------------------------");
+
         if (fail_count == 0) begin
-            $display("║  Result:  ALL TESTS PASSED                       ║");
+            $display("  Result:  ALL TESTS PASSED");
         end else begin
-            $display("║  Result:  SOME TESTS FAILED                      ║");
+            $display("  Result:  SOME TESTS FAILED");
         end
-        
-        $display("╚════════════════════════════════════════════════════╝\n");
+
+        $display("========================================");
+        $display("");
 
         $finish;
     end
 
-    // ═══════════════════════════════════════════════════════════
-    // Optional: Timeout Watchdog
-    // ═══════════════════════════════════════════════════════════
+    // Timeout Watchdog
     initial begin
         #1000000;  // 1ms timeout
-        $display("\n ERROR: Simulation timeout!");
+        $display(" ERROR: Simulation timeout!");
         $finish;
     end
 
