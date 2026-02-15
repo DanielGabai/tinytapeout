@@ -2,30 +2,22 @@
 
 module lfsr_testbench;
 
-    // ═══════════════════════════════════════════════════════════
     // Parameters
-    // ═══════════════════════════════════════════════════════════
     localparam CLK_PERIOD = 10;  // 100MHz clock (10ns period)
 
-    // ═══════════════════════════════════════════════════════════
     // DUT Signals
-    // ═══════════════════════════════════════════════════════════
     logic       clk;
     logic       rst_n;
     logic       load;
     logic [7:0] seed;
     logic [7:0] r_out;
 
-    // ═══════════════════════════════════════════════════════════
     // Testbench Variables
-    // ═══════════════════════════════════════════════════════════
     integer test_count;
     integer pass_count;
     integer fail_count;
 
-    // ═══════════════════════════════════════════════════════════
     // Device Under Test (DUT)
-    // ═══════════════════════════════════════════════════════════
     lfsr uut (
         .clk   (clk),
         .rst_n (rst_n),
@@ -34,15 +26,11 @@ module lfsr_testbench;
         .r_out (r_out)
     );
 
-    // ═══════════════════════════════════════════════════════════
     // Clock Generation
-    // ═══════════════════════════════════════════════════════════
     initial clk = 0;
     always #(CLK_PERIOD/2) clk = ~clk;
 
-    // ═══════════════════════════════════════════════════════════
-    // Helper Tasks
-    // ═══════════════════════════════════════════════════════════
+    // --- Helper Tasks ---
 
     // Reset the DUT
     task reset_dut();
@@ -81,9 +69,7 @@ module lfsr_testbench;
         repeat (n) @(posedge clk);
     endtask
 
-    // ═══════════════════════════════════════════════════════════
-    // Main Test Sequence
-    // ═══════════════════════════════════════════════════════════
+    // --- Main Test Sequence ---
     initial begin
         // Setup waveform dumping
         $dumpfile("logs/lfsr_testbench.vcd");
@@ -103,21 +89,21 @@ module lfsr_testbench;
         $display("  LFSR Testbench");
         $display("============================================\n");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 1: Reset Verification
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 1] Reset Verification");
         reset_dut();
         // After reset, r_out should be 8'd1
         check_value("r_out after reset", 8'h01, r_out);
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 2: LFSR Sequence Verification
         //   Starting from 0x01, the expected sequence is:
         //   01 -> 02 -> 05 -> 0A -> 14 -> 29 -> 53 -> A6
         //   Feedback: r_out[7] ^ r_out[5] ^ r_out[4] ^ r_out[1]
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 2] Free-Running Sequence (8 steps from 0x01)");
         begin
             logic [7:0] expected_seq [0:7];
@@ -137,9 +123,9 @@ module lfsr_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 3: Seed Load
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 3] Seed Load");
         // Load a known seed value
         @(posedge clk);
@@ -158,9 +144,9 @@ module lfsr_testbench;
         check_value("r_out 1 cycle after 0xAB", 8'h57, r_out);
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 4: Seed = 0 Protection (should load 1 instead)
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 4] Seed = 0 Protection");
         @(posedge clk);
         load = 1;
@@ -171,11 +157,11 @@ module lfsr_testbench;
         load = 0;
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 5: Full Period Test
         //   An 8-bit maximal-length LFSR cycles through 255
         //   unique non-zero states before returning to start.
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 5] Full Period Test (255 unique states)");
         // Reset to known state 0x01
         reset_dut();
@@ -233,9 +219,9 @@ module lfsr_testbench;
         end
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // TEST 6: Load During Operation
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("[TEST 6] Load During Operation");
         // Let LFSR run a few cycles then load a new seed mid-operation
         reset_dut();
@@ -256,9 +242,9 @@ module lfsr_testbench;
         check_value("r_out 1 cycle after 0xFF", 8'hFE, r_out);
         $display("");
 
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         // Final Summary
-        // ───────────────────────────────────────────────────────
+        // -------------------------------------------------
         $display("\n============================================");
         $display("  Test Summary");
         $display("--------------------------------------------");
@@ -278,9 +264,7 @@ module lfsr_testbench;
         $finish;
     end
 
-    // ═══════════════════════════════════════════════════════════
     // Timeout Watchdog
-    // ═══════════════════════════════════════════════════════════
     initial begin
         #1000000;  // 1ms timeout
         $display("\n ERROR: Simulation timeout!");
