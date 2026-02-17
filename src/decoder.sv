@@ -11,7 +11,7 @@
       -- 4 --
 */
 
-module seg7 (
+module decoder (
     input logic [3:0] counter,
     output logic [6:0] segments
 );
