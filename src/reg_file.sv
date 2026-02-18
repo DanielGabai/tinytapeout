@@ -5,8 +5,8 @@ module reg_file (
     input logic we,
     
     input logic [2:0] in_reg,
-    input logic [2:0] in_sel,
-    input logic [2:0] out_sel,
+    input logic [3:0] in_sel,
+    input logic [3:0] out_sel,
 
     output logic [2:0] out_reg
 );
