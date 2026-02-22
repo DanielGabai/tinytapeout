@@ -1,6 +1,7 @@
 `include "lfsr.sv"
 `include "reg_file.sv"
 `include "decoder.sv"
+`include "reg_file.sv"
 
 /* Top level file for the game
    Contains the game-state FSM 
@@ -112,10 +113,11 @@ logic [2:0] reg_file_out_decoder_in;
 logic [6:0] decoder_out;
 // Instantiated Modules
 
-// TODO: implement load via FSM controls
+// TODO: implement load, en via FSM controls
 lfsr lfsr (
     .clk(clk),
     .rst_n(rst_n),
+    .en(lfsr_en), 
     .load(lfsr_load),
     .seed(ui_in[5:0]),
     .r_out(lfsr_r_out)
@@ -124,7 +126,7 @@ lfsr lfsr (
 // TODO: implement we, in_sel, out_sel via FSM controls
 reg_file reg_file (
     .clk(clk),
-    .we(reg_file_en),
+    .we(reg_file_we),
     .in_reg(lfsr_r_out),
     .in_sel(reg_file_in_sel),
     .out_sel(reg_file_out_sel),
