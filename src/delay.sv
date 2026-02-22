@@ -27,11 +27,14 @@ always_ff @(posedge clk) begin
         counter <= '0;
         adj_delay <= '0;
     end else begin
-        if (en && !finish) begin
-            counter <= counter + 1'b1;
-        end 
-        if (~en && load_delay) begin
-            adj_delay <= ui_in[4:0];
+        if (en) begin
+            if (!finish) begin
+                counter <= counter + 1'b1;
+            end
+        end else begin
+            if (load_delay) begin
+                adj_delay <= ui_in[4:0];
+            end
         end
     end
 end
