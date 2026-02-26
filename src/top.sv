@@ -64,7 +64,8 @@ end
 localparam logic [6:0] CORRECT = 7'b0111001;
 localparam logic [6:0] INCORRECT = 7'b1110001;
 
-logic lfsr_en;
+logic lfsr_en, reg_file_we;
+logic [3:0] reg_file_in_sel;
 logic [1:0] segment_sel; //0 is decoder_out, 1 is incorrect, 2 is correct 
 // If segment_sel is high, we do the F or C, else its just numbers
 
