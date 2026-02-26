@@ -64,12 +64,17 @@ end
 localparam logic [6:0] CORRECT = 7'b0111001;
 localparam logic [6:0] INCORRECT = 7'b1110001;
 
+logic lfsr_en, lfsr_load;
+logic [1:0] segment_sel; //0 is decoder_out, 1 is incorrect, 2 is correct 
+// If segment_sel is high, we do the F or C, else its just numbers
+
 always_comb begin // Next state logic
     next_state = state;
     // Default signal values
     lfsr_en   = 1'b0;
     lfsr_load = 1'b0;
     reg_file_we = 1'b0;
+    segment_sel = 2'b00;
     case (state) 
         RST : begin
             if (ui_in[7] == 1'b1 && ui_in[6:0] == 7'd0) begin
@@ -110,13 +115,15 @@ always_comb begin // Next state logic
         CORRECT_ANS : begin
             lfsr_en = 1'b0;
             reg_file_we = 1'b0;
+            segment_sel = 2'b10;
             // uo_out = CORRECT; This is wrong but we need a way to drive the decoder?
             next_state = RST;
 
         end
         INCORRECT_ANS : begin
             lfsr_en = 1'b0;
-            reg_file_we = 1'b0l
+            reg_file_we = 1'b0;
+            segment_sel = 2'b01;
             // uo_out = INCORRECT;
             next_state = RST;
         end
@@ -173,6 +180,14 @@ decoder decoder (
 );
 
 // Wire assignments
-assign uo_out = {1'b0, decoder_out};
+always_comb begin
+    if (segment_sel == 2'b10)
+        uo_out = {CORRECT};
+    else if(segment_sel == 2'b01)
+        uo_out = {INCORRECT}
+    else
+        uo_out = {1'b0, decoder_out};
+end
+//assign uo_out = {1'b0, decoder_out};
 
 endmodule
