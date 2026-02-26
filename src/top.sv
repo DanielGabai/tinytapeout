@@ -181,12 +181,15 @@ decoder decoder (
 
 // Wire assignments
 always_comb begin
-    if (segment_sel == 2'b10)
+    if (segment_sel == 2'b10) begin
         uo_out = {CORRECT};
-    else if(segment_sel == 2'b01)
-        uo_out = {INCORRECT}
-    else
+    end
+    else if(segment_sel == 2'b01) begin
+        uo_out = {INCORRECT};
+    end
+    else begin
         uo_out = {1'b0, decoder_out};
+    end
 end
 //assign uo_out = {1'b0, decoder_out};
 
