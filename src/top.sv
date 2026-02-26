@@ -1,7 +1,7 @@
-`include "lfsr.sv"
-`include "reg_file.sv"
-`include "decoder.sv"
-`include "reg_file.sv"
+// `include "lfsr.sv"
+// `include "reg_file.sv"
+// `include "decoder.sv"
+// `include "reg_file.sv"
 
 /* Top level file for the game
    Contains the game-state FSM 
@@ -64,7 +64,7 @@ end
 localparam logic [6:0] CORRECT = 7'b0111001;
 localparam logic [6:0] INCORRECT = 7'b1110001;
 
-logic lfsr_en, lfsr_load;
+logic lfsr_en;
 logic [1:0] segment_sel; //0 is decoder_out, 1 is incorrect, 2 is correct 
 // If segment_sel is high, we do the F or C, else its just numbers
 
