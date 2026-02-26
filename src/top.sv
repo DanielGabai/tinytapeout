@@ -141,7 +141,7 @@ logic lfsr_load;
 logic [7:0] lfsr_r_out;
 
 // Reg File
-logic [2:0] reg_file_out_decoder_in;
+logic [3:0] reg_file_out_decoder_in;
 
 // Decoder 
 logic [6:0] decoder_out;
