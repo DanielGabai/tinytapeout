@@ -1,18 +1,13 @@
-`include "lfsr.sv"
-`include "reg_file.sv"
-`include "decoder.sv"
-`include "reg_file.sv"
+// `include "lfsr.sv"
+// `include "reg_file.sv"
+// `include "decoder.sv"
+// `include "reg_file.sv"
 
 /* Top level file for the game
    Contains the game-state FSM 
    
    Input Switch Map:
    0 - MSB of User Input   | MSB of Seed Input | MSB of Delay Input
-   1 - User Input          | Seed Input        | Delay Input
-   2 - LSB of User Input   | Seed Input        | Delay Input
-   3                       | Seed Input        | Delay Input
-   4                       | Seed Input        | LSB of Delay Input
-   5                       | LSB of Seed Input |
    6 - Submit Answer
    7 - Start / End Game
 
@@ -51,37 +46,53 @@ typedef enum logic [2:0] { // FSM States
     LOAD_SEED,
     LOAD_SEED_INT, 
     LOAD_REG_FILE,
-    LOAD_DELAY
+    LOAD_DELAY,
+    CORRECT_ANS,
+    INCORRECT_ANS
 } state_t;
 
 state_t state, next_state;
 
 always_ff @(posedge clk) begin
     if (!rst_n || ui_in[7] == 1'b0) begin
-        state <= RST;
+        state <= RST; // By a default we are in reset state
     end else begin
         state <= next_state;
     end
 end
 
+localparam logic [6:0] CORRECT = 7'b0111001;
+localparam logic [6:0] INCORRECT = 7'b1110001;
+
+logic lfsr_en, reg_file_we;
+logic [3:0] reg_file_in_sel, reg_file_out_sel;
+logic [1:0] segment_sel; //0 is decoder_out, 1 is incorrect, 2 is correct 
+// If segment_sel is high, we do the F or C, else its just numbers
+
 always_comb begin // Next state logic
     next_state = state;
+    // Default signal values
+    lfsr_en   = 1'b0;
+    lfsr_load = 1'b0;
+    reg_file_we = 1'b0;
+    segment_sel = 2'b00;
     case (state) 
         RST : begin
             if (ui_in[7] == 1'b1 && ui_in[6:0] == 7'd0) begin
                 next_state = LOAD_SEED;
+                lfsr_en = 1'b1; // Enable the lfsr
             end else begin
                 next_state = RST;
             end
         end
-        LOAD_SEED : begin
+        LOAD_SEED : begin // Check that swtich 6 was flipped high
             if (ui_in[6] == 1'b1) begin
                 next_state = LOAD_SEED_INT;
             end else begin
                 next_state = LOAD_SEED;
             end
         end
-        LOAD_SEED_INT : begin
+        LOAD_SEED_INT : begin // Switch 6 went from high to low
             if (ui_in[6] == 1'b0) begin
                 next_state = LOAD_REG_FILE;
                 lfsr_load = 1'b1;
@@ -90,6 +101,37 @@ always_comb begin // Next state logic
             end
         end
         LOAD_REG_FILE : begin
+            lfsr_load = 1'b0;
+            if(ui_in[5] == 1'b1) begin
+                if(lfsr_r_out == ui_in[7:0]) begin // Matches 
+                    next_state = CORRECT_ANS;
+                end else begin
+                    next_state = INCORRECT_ANS;
+                end
+            end
+            else begin
+                next_state = LOAD_REG_FILE;
+            end
+        end
+        CORRECT_ANS : begin
+            lfsr_en = 1'b0;
+            reg_file_we = 1'b0;
+            segment_sel = 2'b10;
+            // uo_out = CORRECT; This is wrong but we need a way to drive the decoder?
+            next_state = RST;
+
+        end
+        INCORRECT_ANS : begin
+            lfsr_en = 1'b0;
+            reg_file_we = 1'b0;
+            segment_sel = 2'b01;
+            // uo_out = INCORRECT;
+            next_state = RST;
+        end
+        default : begin
+            next_state = state;
+            lfsr_en = 1'b0;
+            reg_file_we = 1'b0;
             lfsr_load = 1'b0;
 
         end
@@ -107,7 +149,7 @@ logic lfsr_load;
 logic [7:0] lfsr_r_out;
 
 // Reg File
-logic [2:0] reg_file_out_decoder_in;
+logic [3:0] reg_file_out_decoder_in;
 
 // Decoder 
 logic [6:0] decoder_out;
@@ -139,6 +181,17 @@ decoder decoder (
 );
 
 // Wire assignments
-assign uo_out = {1'b0, decoder_out};
+always_comb begin
+    if (segment_sel == 2'b10) begin
+        uo_out = {CORRECT};
+    end
+    else if(segment_sel == 2'b01) begin
+        uo_out = {INCORRECT};
+    end
+    else begin
+        uo_out = {1'b0, decoder_out};
+    end
+end
+//assign uo_out = {1'b0, decoder_out};
 
 endmodule
