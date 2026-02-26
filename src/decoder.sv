@@ -29,6 +29,9 @@ module decoder (
             7:  segments = 7'b0000111;
             8:  segments = 7'b1111111;
             9:  segments = 7'b1100111;
+
+            CORRECT: segments = 7'b0111001; // [ for correct
+            INCORRECT: segments = 7'b1110001; // F for incorrect
             default:    
                 segments = 7'b0000000;
         endcase
