@@ -37,13 +37,13 @@ module delay_testbench;
     // Reset the DUT (synchronous reset)
     task reset_dut();
         begin
-            en = 0;
-            load_delay = 0;
-            ui_in = 8'b0;
+            en <= 0;
+            load_delay <= 0;
+            ui_in <= 8'b0;
             @(posedge clk);
-            rst_n = 0;
+            rst_n <= 0;
             repeat (3) @(posedge clk);
-            rst_n = 1;
+            rst_n <= 1;
             @(posedge clk);
             $display("[%0t] Reset complete", $time);
         end
@@ -75,11 +75,11 @@ module delay_testbench;
     // Load a delay value (sets adj_delay via ui_in[4:0])
     task load_delay_value(input logic [4:0] val);
         begin
-            en = 0;
-            ui_in = {3'b0, val};
-            load_delay = 1;
+            en <= 0;
+            ui_in <= {3'b0, val};
+            load_delay <= 1;
             @(posedge clk);
-            load_delay = 0;
+            load_delay <= 0;
             @(posedge clk);
             $display("[%0t] Loaded delay bit index = %0d", $time, val);
         end
@@ -96,11 +96,11 @@ module delay_testbench;
         pass_count = 0;
         fail_count = 0;
 
-        // Initialize signals
-        rst_n = 1;
-        en = 0;
-        ui_in = 8'b0;
-        load_delay = 0;
+        // Initialize signals (using non-blocking for DUT inputs)
+        rst_n <= 1;
+        en <= 0;
+        ui_in <= 8'b0;
+        load_delay <= 0;
 
         $display("");
         $display("========================================");
@@ -127,7 +127,7 @@ module delay_testbench;
         $display("[TEST 3] Counter counts while enabled");
         reset_dut();
         load_delay_value(5'd3);
-        en = 1;
+        en <= 1;
         wait_cycles(4);
         check_value("finish (after 4 cycles)", 0, finish);
         $display("  counter = %0d", uut.counter);
@@ -137,7 +137,7 @@ module delay_testbench;
         $display("[TEST 4] Finish asserts when watched bit is set");
         reset_dut();
         load_delay_value(5'd3);
-        en = 1;
+        en <= 1;
         wait_cycles(8);
         check_value("finish (after 8 cycles)", 1, finish);
         $display("  counter = %0d", uut.counter);
@@ -147,7 +147,7 @@ module delay_testbench;
         $display("[TEST 5] Counter stops when finish is high");
         reset_dut();
         load_delay_value(5'd3);
-        en = 1;
+        en <= 1;
         wait_cycles(8);  // get to finish state
         begin
             logic [31:0] saved_counter;
@@ -162,7 +162,7 @@ module delay_testbench;
         $display("[TEST 6] Reset clears counter mid-count");
         reset_dut();
         load_delay_value(5'd4);
-        en = 1;
+        en <= 1;
         wait_cycles(5);  // count partway
         reset_dut();
         check_value("counter (after reset)", 0, uut.counter);
@@ -173,7 +173,7 @@ module delay_testbench;
         $display("[TEST 7] Different delay value (bit 1)");
         reset_dut();
         load_delay_value(5'd1);  // watch bit 1 -> finish after counter reaches 2
-        en = 1;
+        en <= 1;
         wait_cycles(1);
         check_value("finish (after 1 cycle)", 0, finish);
         wait_cycles(1);
@@ -184,7 +184,7 @@ module delay_testbench;
         $display("[TEST 8] Counter does not count when disabled");
         reset_dut();
         load_delay_value(5'd4);
-        en = 0;
+        en <= 0;
         begin
             logic [31:0] saved_counter;
             saved_counter = uut.counter;
