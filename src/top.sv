@@ -114,7 +114,7 @@ always_comb begin // Next state logic
         LOAD_REG_FILE : begin
             lfsr_load = 1'b0;
             if(ui_in[5] == 1'b1) begin
-                if(lfsr_r_out == ui_in[7:0]) begin // Matches 
+                if(lfsr_r_out == ui_in[2:0]) begin // Matches //TODO: I had to sub out this if statement to get gds to run
                     next_state = CORRECT_ANS;
                 end else begin
                     next_state = INCORRECT_ANS;

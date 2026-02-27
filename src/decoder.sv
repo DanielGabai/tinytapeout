@@ -12,7 +12,7 @@
 */
 
 module decoder (
-    input logic [3:0] counter,
+    input logic [2:0] counter,
     output logic [6:0] segments
 );
 
@@ -27,8 +27,8 @@ module decoder (
             5:  segments = 7'b1101101;
             6:  segments = 7'b1111100;
             7:  segments = 7'b0000111;
-            8:  segments = 7'b1111111;
-            9:  segments = 7'b1100111;
+            //8:  segments = 7'b1111111;
+            //9:  segments = 7'b1100111;
             default:    
                 segments = 7'b0000000;
         endcase
