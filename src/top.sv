@@ -8,6 +8,11 @@
    
    Input Switch Map:
    0 - MSB of User Input   | MSB of Seed Input | MSB of Delay Input
+   1 - User Input          | Seed Input        | Delay Input
+   2 - LSB of User Input   | Seed Input        | Delay Input
+   3                       | Seed Input        | Delay Input
+   4                       | Seed Input        | LSB of Delay Input
+   5                       | LSB of Seed Input |
    6 - Submit Answer
    7 - Start / End Game
 
@@ -32,10 +37,14 @@ module tt_um_memory_game_top (
     output logic [7:0] uo_out,   // Seven Seg Output
 
     // Below not used
+    /* verilator lint_off UNUSEDSIGNAL */
+    /* verilator lint_off UNDRIVEN */
     input logic [7:0] uio_in,
     output logic [7:0] uio_out,
     output logic [7:0] uio_oe,
     input logic ena // always 1 when design is powered
+    /* verilator lint_on UNUSEDSIGNAL */
+    /* verilator lint_on UNDRIVEN */
 );
 
 
@@ -61,11 +70,13 @@ always_ff @(posedge clk) begin
     end
 end
 
-localparam logic [6:0] CORRECT = 7'b0111001;
-localparam logic [6:0] INCORRECT = 7'b1110001;
+localparam logic [7:0] CORRECT = 8'b00111001;
+localparam logic [7:0] INCORRECT = 8'b01110001;
 
 logic lfsr_en, reg_file_we;
+/* verilator lint_off UNDRIVEN */
 logic [3:0] reg_file_in_sel, reg_file_out_sel;
+/* verilator lint_on UNDRIVEN */
 logic [1:0] segment_sel; //0 is decoder_out, 1 is incorrect, 2 is correct 
 // If segment_sel is high, we do the F or C, else its just numbers
 
@@ -146,10 +157,10 @@ end
 
 // LFSR
 logic lfsr_load;
-logic [7:0] lfsr_r_out;
+logic [2:0] lfsr_r_out;
 
 // Reg File
-logic [3:0] reg_file_out_decoder_in;
+logic [2:0] reg_file_out_decoder_in;
 
 // Decoder 
 logic [6:0] decoder_out;
