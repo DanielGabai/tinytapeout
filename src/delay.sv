@@ -9,6 +9,8 @@ module delay (
     output logic finish
 );
 
+    logic [2:0] _unused = ui_in[7:5];
+
     logic [31:0] counter;
     logic [4:0] adj_delay;
 
