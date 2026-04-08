@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(iverilog -g2012 -o build/top.vvp src/*.sv test/top_testbench.sv)",
+      "Bash(vvp build/top.vvp)"
+    ]
+  }
+}
