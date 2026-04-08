@@ -104,7 +104,7 @@ module game_fsm (
             end
 
             S_SEQ_DONE: begin
-                // delay_en defaults to 0 here, resetting the timer!
+                // delay_en defaults to 0 here, resetting the timer
                 seg_mode = 2'b01; // Keep number on screen for this 1 cycle
                 if (round_done) begin
                     ptr_reset = 1'b1;
@@ -121,7 +121,7 @@ module game_fsm (
             end
 
             S_GAP_DONE: begin
-                // delay_en defaults to 0 here, resetting the timer!
+                // delay_en defaults to 0 here, resetting the timer
                 seg_mode = 2'b00;
                 index_inc = 1'b1; // Move to the next digit
                 next_state = S_SHOW_SEQ;

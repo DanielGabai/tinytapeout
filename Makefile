@@ -47,6 +47,13 @@ list:
 	@echo "Available modules for simulation:"
 	@$(foreach mod,$(MODULES),echo "  - $(mod)";)
 
+# Top-level module needs all source files (it instantiates all submodules)
+ifeq ($(MODULE),top)
+MODULE_SRC := $(SRC_FILES)
+else
+MODULE_SRC := $(SRC_DIR)/$(MODULE).sv
+endif
+
 # Simulation target for individual modules
 .PHONY: sim
 sim: | $(BUILD_DIR) $(LOG_DIR)
@@ -58,7 +65,7 @@ endif
 	@echo "Simulating $(MODULE)..."
 ifeq ($(SIM),iverilog)
 	iverilog -g2012 -o $(BUILD_DIR)/$(MODULE).vvp \
-		$(SRC_DIR)/$(MODULE).sv \
+		$(MODULE_SRC) \
 		$(TEST_DIR)/$(MODULE)_testbench.sv \
 		2>&1 | tee $(LOG_DIR)/$(MODULE)_compile.log
 	vvp $(BUILD_DIR)/$(MODULE).vvp 2>&1 | tee $(LOG_DIR)/$(MODULE)_sim.log
@@ -67,14 +74,14 @@ else ifeq ($(SIM),vcs)
 	vcs -full64 -sverilog +v2k -timescale=1ns/1ps \
 		-debug_access+all \
 		-o $(BUILD_DIR)/$(MODULE).simv \
-		$(SRC_DIR)/$(MODULE).sv \
+		$(MODULE_SRC) \
 		$(TEST_DIR)/$(MODULE)_testbench.sv \
 		2>&1 | tee $(LOG_DIR)/$(MODULE)_compile.log
 	$(BUILD_DIR)/$(MODULE).simv 2>&1 | tee $(LOG_DIR)/$(MODULE)_sim.log
 else ifeq ($(SIM),xcelium)
 	xrun -64bit -sv -access +rwc \
 		-timescale 1ns/1ps \
-		$(SRC_DIR)/$(MODULE).sv \
+		$(MODULE_SRC) \
 		$(TEST_DIR)/$(MODULE)_testbench.sv \
 		-l $(LOG_DIR)/$(MODULE)_sim.log
 else

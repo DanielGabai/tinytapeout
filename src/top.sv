@@ -29,7 +29,9 @@
    3) 
    */
 
-module tt_um_memory_game_top (
+module tt_um_memory_game_top #(
+    parameter int DEBOUNCE_CYCLES = 500_000  // ~10ms at 50MHz; override in testbench
+) (
     input  logic       clk,
     input  logic       rst_n,
     input  logic [7:0] ui_in,    // Input Switches
@@ -53,16 +55,26 @@ module tt_um_memory_game_top (
     localparam logic [6:0] SEG_OFF = 7'b0000000; // Seven seg off
 
 
+    // Synchronized switch inputs
+    logic [7:0] ui_in_sync;
+
+    synchronizer #(.WIDTH(8), .DEBOUNCE_CYCLES(DEBOUNCE_CYCLES)) sw_sync (
+        .clk      (clk),
+        .rst_n    (rst_n),
+        .async_in (ui_in),
+        .sync_out (ui_in_sync)
+    );
+
     // User Inputs
     logic start_btn;
     logic submit_btn;
     logic [5:0] seed_in;
     logic [2:0] user_guess;
-    
-    assign start_btn  = ui_in[7];
-    assign submit_btn = ui_in[6];
-    assign seed_in    = ui_in[5:0];
-    assign user_guess = ui_in[2:0];
+
+    assign start_btn  = ui_in_sync[7];
+    assign submit_btn = ui_in_sync[6];
+    assign seed_in    = ui_in_sync[5:0];
+    assign user_guess = ui_in_sync[2:0];
 
     // Datapath Routing
     logic submit_pulse;
@@ -141,7 +153,7 @@ module tt_um_memory_game_top (
         .rst_n(rst_n),
         .en(delay_en),
         .load_delay(delay_load),
-        .ui_in(ui_in),          // Passes switches to delay loader
+        .ui_in(ui_in_sync),     // Passes synchronized switches to delay loader
         .finish(delay_finish)
     );
 

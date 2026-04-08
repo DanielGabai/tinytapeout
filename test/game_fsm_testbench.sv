@@ -93,6 +93,7 @@ module game_fsm_testbench;
 
     task wait_cycles(input integer n);
         repeat (n) @(posedge clk);
+        #1; // Wait for non-blocking assignments to commit before sampling outputs
     endtask
 
     // --- Main Test Sequence ---
@@ -156,6 +157,7 @@ module game_fsm_testbench;
         // Now in S_SEQ_DONE
         delay_finish <= 0;
         round_done <= 1;   // Datapath says we only show 1 digit this round
+        #1; // Let round_done NBA commit before sampling ptr_reset
         check_value("delay_en (Dropped to reset timer)", 0, delay_en);
         check_value("ptr_reset (Prep for input)", 1, ptr_reset);
         

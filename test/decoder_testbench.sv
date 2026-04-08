@@ -10,7 +10,7 @@ module decoder_testbench;
     logic       rst_n;
     
     // Decoder Specific Signals
-    logic [3:0] counter;
+    logic [2:0] counter;
     logic [6:0] segments;
 
     // Testbench Variables
@@ -35,7 +35,7 @@ module decoder_testbench;
         begin
             @(posedge clk);
             rst_n = 0;
-            counter = 4'h0;
+            counter = 3'h0;
             repeat (3) @(posedge clk);
             rst_n = 1;
             @(posedge clk);
@@ -79,7 +79,7 @@ module decoder_testbench;
         
         // Initialize signals
         rst_n = 1;
-        counter = 4'h0;
+        counter = 3'h0;
 
         $display("");
         $display("========================================");
@@ -97,23 +97,19 @@ module decoder_testbench;
         $display("[TEST 2] Basic Functionality (0-9)");
         
         // Manual checks for specific digits
-        counter = 4'd1; #1; check_value("segments(1)", 7'b0000110, segments);
-        counter = 4'd2; #1; check_value("segments(2)", 7'b1011011, segments);
-        counter = 4'd3; #1; check_value("segments(3)", 7'b1001111, segments);
-        counter = 4'd4; #1; check_value("segments(4)", 7'b1100110, segments);
-        counter = 4'd5; #1; check_value("segments(5)", 7'b1101101, segments);
-        counter = 4'd6; #1; check_value("segments(6)", 7'b1111100, segments);
-        counter = 4'd7; #1; check_value("segments(7)", 7'b0000111, segments);
-        counter = 4'd8; #1; check_value("segments(8)", 7'b1111111, segments);
-        counter = 4'd9; #1; check_value("segments(9)", 7'b1100111, segments);
+        counter = 3'd1; #1; check_value("segments(1)", 7'b0000110, segments);
+        counter = 3'd2; #1; check_value("segments(2)", 7'b1011011, segments);
+        counter = 3'd3; #1; check_value("segments(3)", 7'b1001111, segments);
+        counter = 3'd4; #1; check_value("segments(4)", 7'b1100110, segments);
+        counter = 3'd5; #1; check_value("segments(5)", 7'b1101101, segments);
+        counter = 3'd6; #1; check_value("segments(6)", 7'b1111100, segments);
+        counter = 3'd7; #1; check_value("segments(7)", 7'b0000111, segments);
         
         $display("");
 
-        // TEST 3: Edge Cases (Hex/Default)
-        $display("[TEST 3] Edge Cases (Invalid inputs)");
-        reset_dut();
-        counter = 4'hA; #1; check_value("segments(A)", 7'b0000000, segments);
-        counter = 4'hF; #1; check_value("segments(F)", 7'b0000000, segments);
+        // TEST 3: Wraparound (counter is 3-bit, all values 0-7 are explicitly handled)
+        $display("[TEST 3] All inputs covered (no invalid cases for 3-bit input)");
+        counter = 3'd0; #1; check_value("segments(0) revisit", 7'b0111111, segments);
         $display("");
 
         // --- Final Summary ---
